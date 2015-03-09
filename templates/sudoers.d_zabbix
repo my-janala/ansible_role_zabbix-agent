@@ -1,0 +1,19 @@
+Defaults:zabbix !requiretty
+
+## Cmnd alias specification
+Cmnd_Alias C_ZFS = \
+  /usr/bin/zfs get, /sbin/zfs get *, \
+  /usr/bin/zfs list, /sbin/zfs list *, \
+  /usr/bin/zpool get, /sbin/zpool get *, \
+  /usr/bin/zpool iostat, /sbin/zpool iostat *, \
+  /usr/bin/zpool list, /sbin/zpool list *, \
+  /usr/bin/zpool status, /sbin/zpool status *
+
+## User privilege specification
+root    ALL=(ALL) ALL
+
+## Allow zabbix user to use basic read-only ZFS commands
+zabbix ALL = (root) NOPASSWD: C_ZFS
+
+## Allow zabbix user to run mdraid helper script(s)
+zabbix ALL = (root) NOPASSWD: /opt/bin/zabbix/zabbix_mdraid.sh
