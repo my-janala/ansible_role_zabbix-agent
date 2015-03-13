@@ -1,43 +1,43 @@
 ---
-- name: Download packages
-  tags:
-    - pkg_download
-  yaourt: name={{ item }} download_only=yes
-  with_items:
-    - "{{ pkg_pacman }}"
+- name: Add the OS specific varibles
+  include_vars: "{{ ansible_os_family }}.yml"
 
 - name: Install packages
   tags: 
     - pkg_install
   pacman: name={{ item }} state=present
   with_items:
-    - "{{ pkg_pacman }}"
+    - "{{ zabbix_agent_packages }}"
+  when: ansible_os_family == "ArchLinux"
+
+- name: Install packages
+  tags:
+    - pkg_install
+  apt: name={{ item }} state=present
+  with-items:
+    - "{{ ansible_agent_packages }}"
+  when: ansible_os_family == "Debian"
 
 - name: Enable zabbix agent
   tags:
     - pkg_install
-  service: name=zabbix-agentd enabled=yes
-
-- name: Start zabbix agent
-  tags:
-    - pkg_install
-  service: name=zabbix-agentd state=started
+  service: name={{ zabbix_agent_service_name }} enabled=yes
 
 - name: Make sure helper script directory exists
-  file: path=/opt/bin/zabbix state=directory
+  file: path={{ zabbix_agent_helper_script_dir }} state=directory
         owner=zabbix group=zabbix mode=770
 
 - name: Setup mdadm helper script
-  copy: src=/etc/ansible/roles/zabbix_agent/templates/zabbix_mdraid.sh dest=/opt/bin/zabbix
+  copy: src=/etc/ansible/roles/zabbix_agent/templates/zabbix_mdraid.sh dest="{{ zabbix_agent_helper_script_dir }}"
         owner=zabbix group=zabbix mode=0550
 
 - name: Setup nginx helper script
-  copy: src=/etc/ansible/roles/zabbix_agent/templates/nginx-check.sh dest=/opt/bin/zabbix
+  copy: src=/etc/ansible/roles/zabbix_agent/templates/nginx-check.sh dest="{{ zabbix_agent_helper_script_dir }}"
         owner=zabbix group=zabbix mode=0550
   when: nginx is defined and nginx
 
 - name: Setup php-fpm helper script
-  copy: src=/etc/ansible/roles/zabbix_agent/templates/php-fpm-check.sh dest=/opt/bin/zabbix
+  copy: src=/etc/ansible/roles/zabbix_agent/templates/php-fpm-check.sh dest="{{ zabbix_agent_helper_script_dir }}"
         owner=zabbix group=zabbix mode=0550
   when: php_fpm is defined and php_fpm
 
@@ -46,17 +46,17 @@
   when: postgres is defined and postgres
 
 - name: Setup postgres find database script
-  copy: src=/etc/ansible/roles/zabbix_agent/templates/find_dbname.sh dest=/opt/bin/zabbix
+  copy: src=/etc/ansible/roles/zabbix_agent/templates/find_dbname.sh dest="{{ zabbix_agent_helper_script_dir }}"
         owner=zabbix group=zabbix mode=0550
   when: postgres is defined and postgres
 
 - name: Setup postgres find database table script
-  copy: src=/etc/ansible/roles/zabbix_agent/templates/find_dbname_table.sh dest=/opt/bin/zabbix
+  copy: src=/etc/ansible/roles/zabbix_agent/templates/find_dbname_table.sh dest="{{ zabbix_agent_helper_script_dir }}"
         owner=zabbix group=zabbix mode=0550
   when: postgres is defined and postgres
 
 - name: Setup postfix helper script
-  copy: src=/etc/ansible/roles/zabbix_agent/templates/postfix.sh dest=/opt/bin/zabbix
+  copy: src=/etc/ansible/roles/zabbix_agent/templates/postfix.sh dest="{{ zabbix_agent_helper_script_dir }}"
         owner=zabbix group=zabbix mode=0550
   when: real_email is defined and real_email
 
@@ -89,7 +89,7 @@
     - zabbix_agent.conf
     - zabbix_agentd.conf
   notify:
-    - restart zabbix-agentd
+    - restart zabbix-agent
 
 - name: Setup agent user variables
   tags:
@@ -104,5 +104,5 @@
     - userparameter_pgsql.conf
     - postfix-params.conf
   notify:
-    - restart zabbix-agentd
+    - restart zabbix-agent
 

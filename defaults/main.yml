@@ -1,8 +1,4 @@
 ---
-pkg_pacman:
-  - zabbix-agent
-  - pflogsumm
-
 # zabbix_agent_debuglevel: 3
 
 zabbix_agent_server: "127.0.0.1"
@@ -19,4 +15,4 @@ zabbix_agent_startagents: 3
 zabbix_agent_hostname: "{{ ansible_fqdn }}"
 
 zabbix_agent_include_dir: "/etc/zabbix/zabbix_agentd.conf.d"
-
+zabbix_agent_helper_script_dir: /opt/bin/zabbix
