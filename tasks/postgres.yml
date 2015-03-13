@@ -1,0 +1,22 @@
+---
+- name: Setup zabbix agent role (for pgsql template)
+  postgresql_user: name=zabbix state=present
+
+- name: Setup postgres find database script
+  copy: src=find_dbname.sh dest="{{ zabbix_agent_helper_script_dir }}"
+        owner=zabbix group=zabbix mode=0550
+
+- name: Setup postgres find database table script
+  copy: src=find_dbname_table.sh dest="{{ zabbix_agent_helper_script_dir }}"
+        owner=zabbix group=zabbix mode=0550
+
+- name: Setup agent user variables
+  tags:
+    - pkg_config
+  copy: src={{ item }} dest=/etc/zabbix/zabbix_agentd.conf.d
+        owner=zabbix group=zabbix mode=0440
+  with_items:
+    - userparameter_pgsql.conf
+  notify:
+    - restart zabbix-agent
+

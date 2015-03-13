@@ -1,4 +1,11 @@
 ---
+zabbix_agent_helper_mdadm: False
+zabbix_agent_helper_nginx: False
+zabbix_agent_helper_php_fpm: False
+zabbix_agent_helper_postfix: False
+zabbix_agent_helper_postgres: False
+zabbix_agent_helper_zfs: False
+
 # zabbix_agent_debuglevel: 3
 
 zabbix_agent_server: "127.0.0.1"
@@ -7,7 +14,7 @@ zabbix_agent_listenport: 10050
 zabbix_agent_timeout: 30
 zabbix_agent_remotecommands: 1
 
-zabbix_agent_pidfile: "/run/zabbix/zabbix_agentd.pid"
+# for pid file overrides see vars/ansible_os_family.yml
 zabbix_agent_logfile: "/var/log/zabbix/zabbix_agentd.log"
 zabbix_agent_logremotecommands: 0
 

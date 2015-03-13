@@ -1,0 +1,25 @@
+- name: Setup postfix helper script
+  copy: src=postfix.sh dest="{{ zabbix_agent_helper_script_dir }}"
+        owner=zabbix group=zabbix mode=0550
+
+- name: Allow zabbix access to postfix directory
+  acl: name=/etc/postfix entity=zabbix etype=user permissions="rx" state=present
+
+- name: Allow zabbix access to postfix config
+  acl: name=/etc/postfix/main.cf entity=zabbix etype=user permissions="r" state=present
+
+- name: Setup postfix helper script cron job
+  cron: name="Zabbix Postfix Monitor" state=present
+        job="{{ zabbix_agent_helper_script_dir }}/postfix.sh"
+        minute="*/15"
+
+- name: Setup agent user variables
+  tags:
+    - pkg_config
+  copy: src={{ item }} dest=/etc/zabbix/zabbix_agentd.conf.d
+        owner=zabbix group=zabbix mode=0440
+  with_items:
+    - postfix-params.conf
+  notify:
+    - restart zabbix-agent
+

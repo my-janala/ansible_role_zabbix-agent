@@ -5,7 +5,7 @@
 - name: Install packages
   tags: 
     - pkg_install
-  pacman: name={{ item }} state=present
+  pacman: name="{{ item }}" state=present
   with_items:
     - "{{ zabbix_agent_packages }}"
   when: ansible_os_family == "ArchLinux"
@@ -13,9 +13,9 @@
 - name: Install packages
   tags:
     - pkg_install
-  apt: name={{ item }} state=present
-  with-items:
-    - "{{ ansible_agent_packages }}"
+  apt: name="{{ item }}" state=present
+  with_items:
+    - "{{ zabbix_agent_packages }}"
   when: ansible_os_family == "Debian"
 
 - name: Enable zabbix agent
@@ -27,52 +27,23 @@
   file: path={{ zabbix_agent_helper_script_dir }} state=directory
         owner=zabbix group=zabbix mode=770
 
-- name: Setup mdadm helper script
-  copy: src=/etc/ansible/roles/zabbix_agent/templates/zabbix_mdraid.sh dest="{{ zabbix_agent_helper_script_dir }}"
-        owner=zabbix group=zabbix mode=0550
+- include: mdadm.yml
+  when: zabbix_agent_helper_mdadm
 
-- name: Setup nginx helper script
-  copy: src=/etc/ansible/roles/zabbix_agent/templates/nginx-check.sh dest="{{ zabbix_agent_helper_script_dir }}"
-        owner=zabbix group=zabbix mode=0550
-  when: nginx is defined and nginx
+- include: nginx.yml
+  when: zabbix_agent_helper_nginx
 
-- name: Setup php-fpm helper script
-  copy: src=/etc/ansible/roles/zabbix_agent/templates/php-fpm-check.sh dest="{{ zabbix_agent_helper_script_dir }}"
-        owner=zabbix group=zabbix mode=0550
-  when: php_fpm is defined and php_fpm
+- include: php_fpm.yml
+  when: zabbix_agent_helper_php_fpm
 
-- name: Setup zabbix agent role (for pgsql template)
-  postgresql_user: name=zabbix state=present
-  when: postgres is defined and postgres
+- include: postfix.yml
+  when: zabbix_agent_helper_postfix
 
-- name: Setup postgres find database script
-  copy: src=/etc/ansible/roles/zabbix_agent/templates/find_dbname.sh dest="{{ zabbix_agent_helper_script_dir }}"
-        owner=zabbix group=zabbix mode=0550
-  when: postgres is defined and postgres
+- include: postgres.yml
+  when: zabbix_agent_helper_postgres
 
-- name: Setup postgres find database table script
-  copy: src=/etc/ansible/roles/zabbix_agent/templates/find_dbname_table.sh dest="{{ zabbix_agent_helper_script_dir }}"
-        owner=zabbix group=zabbix mode=0550
-  when: postgres is defined and postgres
-
-- name: Setup postfix helper script
-  copy: src=/etc/ansible/roles/zabbix_agent/templates/postfix.sh dest="{{ zabbix_agent_helper_script_dir }}"
-        owner=zabbix group=zabbix mode=0550
-  when: real_email is defined and real_email
-
-- name: Allow zabbix access to postfix directory
-  acl: name=/etc/postfix entity=zabbix etype=user permissions="rx" state=present
-  when: real_email is defined and real_email
-
-- name: Allow zabbix access to postfix config
-  acl: name=/etc/postfix/main.cf entity=zabbix etype=user permissions="r" state=present
-  when: real_email is defined and real_email
-
-- name: Setup postfix helper script cron job
-  cron: name="Zabbix Postfix Monitor" state=present
-        job="/opt/bin/zabbix/postfix.sh"
-        minute="*/15"
-  when: real_email is defined and real_email
+- include: zfs.yml
+  when: zabbix_agent_helper_zfs
 
 - name: Setup zabbix sudoers privileges
   tags:
@@ -83,7 +54,7 @@
 - name: Setup main agent configs
   tags:
     - pkg_config
-  template: src={{ item }} dest=/etc/zabbix
+  template: src="{{ item }}" dest="/etc/zabbix/{{ item }}"
             owner=zabbix group=zabbix mode=0440
   with_items:
     - zabbix_agent.conf
@@ -91,18 +62,4 @@
   notify:
     - restart zabbix-agent
 
-- name: Setup agent user variables
-  tags:
-    - pkg_config
-  copy: src=/etc/ansible/roles/zabbix_agent/templates/{{ item }} dest=/etc/zabbix/zabbix_agentd.conf.d
-        owner=zabbix group=zabbix mode=0440
-  with_items:
-    - md.conf
-    - zfs.conf
-    - nginx-params.conf
-    - php-fpm-params.conf
-    - userparameter_pgsql.conf
-    - postfix-params.conf
-  notify:
-    - restart zabbix-agent
-
+- debug: msg={{ zabbix_agent_helper_zfs }}

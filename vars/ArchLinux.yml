@@ -3,3 +3,4 @@ zabbix_agent_service_name: zabbix-agentd
 zabbix_agent_packages:
   - zabbix-agent
   - pflogsumm
+zabbix_agent_pidfile: "/run/zabbix/zabbix_agentd.pid"
