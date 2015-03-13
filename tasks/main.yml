@@ -2,6 +2,13 @@
 - name: Add the OS specific varibles
   include_vars: "{{ ansible_os_family }}.yml"
 
+- name: Add zabbix official apt repos
+  apt_repository: repo="{{ item }}" state=present
+  with_items:
+    - "deb http://repo.zabbix.com/zabbix/2.4/ubuntu trusty main"
+    - "deb-src http://repo.zabbix.com/zabbix/2.4/ubuntu trusty main"
+  when: ansible_os_family == "Debian"
+
 - name: Install packages
   tags: 
     - pkg_install
@@ -13,7 +20,7 @@
 - name: Install packages
   tags:
     - pkg_install
-  apt: name="{{ item }}" state=present
+  apt: name="{{ item }}" state=present update_cache=yes
   with_items:
     - "{{ zabbix_agent_packages }}"
   when: ansible_os_family == "Debian"
