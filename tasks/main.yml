@@ -9,6 +9,10 @@
     - "deb-src http://repo.zabbix.com/zabbix/2.4/ubuntu trusty main"
   when: ansible_os_family == "Debian"
 
+- name: Add zabbix apt key(s)
+  apt_key: url="http://repo.zabbix.com/zabbix-official-repo.key"
+  when: ansible_os_family == "Debian"
+
 - name: Install packages
   tags: 
     - pkg_install
