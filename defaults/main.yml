@@ -8,7 +8,8 @@ zabbix_agent_helper_zfs: False
 
 # zabbix_agent_debuglevel: 3
 
-zabbix_agent_server: "127.0.0.1"
+zabbix_agent_servers: 
+  - 127.0.0.1
 zabbix_agent_listenip: "0.0.0.0"
 zabbix_agent_listenport: 10050
 zabbix_agent_timeout: 30

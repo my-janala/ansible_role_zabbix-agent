@@ -72,5 +72,3 @@
     - zabbix_agentd.conf
   notify:
     - restart zabbix-agent
-
-- debug: msg={{ zabbix_agent_helper_zfs }}
