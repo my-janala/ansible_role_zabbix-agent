@@ -4,3 +4,4 @@ zabbix_agent_packages:
   - zabbix-agent
   - pflogsumm
 zabbix_agent_pidfile: "/run/zabbix/zabbix_agentd.pid"
+zabbix_agent_zfs_dir: /usr/bin
