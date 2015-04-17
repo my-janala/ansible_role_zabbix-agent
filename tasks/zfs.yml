@@ -2,7 +2,7 @@
 - name: Setup agent user variables
   tags:
     - pkg_config
-  copy: src={{ item }} dest=/etc/zabbix/zabbix_agentd.conf.d
+  copy: src={{ item }} dest=/etc/zabbix/zabbix_agentd.conf.d/
         owner=zabbix group=zabbix mode=0440
   with_items:
     - zfs.conf

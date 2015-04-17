@@ -1,15 +1,5 @@
 ---
-- name: Setup mdadm helper script
-  copy: src=zabbix_mdraid.sh dest="{{ zabbix_agent_helper_script_dir }}"
-        owner=zabbix group=zabbix mode=0550
-  
-- name: Setup agent user variables
-  tags:
-    - pkg_config
-  copy: src={{ item }} dest=/etc/zabbix/zabbix_agentd.conf.d
-        owner=zabbix group=zabbix mode=0440
-  with_items:
-    - md.conf
-  notify:
-    - restart zabbix-agent
+# Changed approach
+# Need libjson-perl for perl script
+# Put md.conf, program, etc in right places
 

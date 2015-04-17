@@ -15,5 +15,6 @@ zabbix ALL = (root) NOPASSWD: C_ZABBIX_ZFS
 
 {% if zabbix_agent_helper_mdadm %}
 ## Allow zabbix user to run mdraid helper script(s)
-zabbix ALL = (root) NOPASSWD: /opt/bin/zabbix/zabbix_mdraid.sh *
+zabbix ALL = (root) NOPASSWD: /opt/bin/zabbix/mdadm.pl \
+  /opt/bin/zabbix/mdadm.pl *
 {% endif %}
